@@ -1,0 +1,28 @@
+run:
+  timeout: 3m
+  tests: true
+  issues-exit-code: 1
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - ineffassign
+    - gofmt
+    - goimports
+    - revive
+
+issues:
+  exclude-use-default: false
+
+linters-settings:
+  revive:
+    severity: warning
+    rules:
+      - name: indent-error-flow
+      - name: errorf
+  gofmt:
+    simplify: true
+
+
