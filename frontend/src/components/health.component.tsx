@@ -11,12 +11,12 @@ export const HealthComponent = () => {
 
     if (isLoading) return <Text>Loading...</Text>
 
-    if (error) return <Text>Error: {error.message}</Text>
+    if (error) return <Text>Error: {error instanceof Error ? error.message : 'Unknown error'}</Text>
 
     return (
         <Container>
             <Title order={1}>Health</Title>
-            <Text>{data.message}</Text>
+            <Text>{data?.message || 'No message available'}</Text>
         </Container>
     )
 }

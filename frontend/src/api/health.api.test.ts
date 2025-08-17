@@ -1,5 +1,6 @@
 import { mainHealth } from './health.api';
 import { ROUTES } from '../constants/urls';
+import type { HealthResponse } from '../types/api.types';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -11,11 +12,11 @@ describe('mainHealth API', () => {
   });
 
   it('should fetch health data successfully', async () => {
-    const mockHealthData = { message: 'Service is healthy!' };
+    const mockHealthData: HealthResponse = { message: 'Service is healthy!' };
     
     mockFetch.mockResolvedValue({
       ok: true,
-      json: async () => mockHealthData,
+      json: async () => await Promise.resolve(mockHealthData),
     } as Response);
 
     const result = await mainHealth();
