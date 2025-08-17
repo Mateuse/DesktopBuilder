@@ -1,0 +1,46 @@
+repos:
+  # Local hooks for our project
+  - repo: local
+    hooks:
+      # Frontend hooks
+      - id: frontend-lint
+        name: Frontend ESLint
+        entry: bash -c 'cd frontend && npm run lint'
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+      - id: frontend-test
+        name: Frontend Tests
+        entry: bash -c 'cd frontend && npm run test:run'
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+
+      # Backend hooks
+      - id: backend-lint
+        name: Backend Lint (Go)
+        entry: bash -c 'cd backend && make lint'
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+
+      - id: backend-test
+        name: Backend Tests (Go)
+        entry: bash -c 'cd backend && make test'
+        language: system
+        files: ^backend/.*\.go$
+        pass_filenames: false
+
+      # Basic file checks
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+        entry: bash -c 'if [ $# -gt 0 ]; then sed -i "s/[[:space:]]*$//" "$@"; fi'
+        language: system
+        types: [text]
+
+      - id: end-of-file-fixer
+        name: Fix End of Files
+        entry: bash -c 'for file in "$@"; do if [ -s "$file" ] && [ "$(tail -c1 "$file" 2>/dev/null)" != "" ]; then echo >> "$file"; fi; done'
+        language: system
+        types: [text]

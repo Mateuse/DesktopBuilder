@@ -38,44 +38,44 @@ is_service_running() {
 # Function to check if PostgreSQL is running
 check_postgres() {
     print_status "Checking PostgreSQL status..."
-    
+
     # Check if PostgreSQL service is running
     if is_service_running "postgresql"; then
         print_success "PostgreSQL is already running"
         return 0
     fi
-    
+
     # Try alternative service names
     if is_service_running "postgres"; then
         print_success "PostgreSQL is already running"
         return 0
     fi
-    
+
     # Check if PostgreSQL is running on the expected port
     if netstat -tuln 2>/dev/null | grep -q ":5432 "; then
         print_success "PostgreSQL is running on port 5432"
         return 0
     fi
-    
+
     return 1
 }
 
 # Function to start PostgreSQL
 start_postgres() {
     print_status "Starting PostgreSQL..."
-    
+
     # Try to start PostgreSQL service
     if sudo systemctl start postgresql 2>/dev/null; then
         print_success "PostgreSQL started successfully"
         return 0
     fi
-    
+
     # Try alternative service name
     if sudo systemctl start postgres 2>/dev/null; then
         print_success "PostgreSQL started successfully"
         return 0
     fi
-    
+
     print_error "Failed to start PostgreSQL. Please ensure PostgreSQL is installed and configured."
     return 1
 }
@@ -83,50 +83,50 @@ start_postgres() {
 # Function to check if Redis is running
 check_redis() {
     print_status "Checking Redis status..."
-    
+
     # Check if Redis service is running
     if is_service_running "redis-server"; then
         print_success "Redis is already running"
         return 0
     fi
-    
+
     # Try alternative service name
     if is_service_running "redis"; then
         print_success "Redis is already running"
         return 0
     fi
-    
+
     # Check if Redis is running on the expected port
     if netstat -tuln 2>/dev/null | grep -q ":6379 "; then
         print_success "Redis is running on port 6379"
         return 0
     fi
-    
+
     # Try to ping Redis directly
     if redis-cli ping >/dev/null 2>&1; then
         print_success "Redis is responding to ping"
         return 0
     fi
-    
+
     return 1
 }
 
 # Function to start Redis
 start_redis() {
     print_status "Starting Redis..."
-    
+
     # Try to start Redis service
     if sudo systemctl start redis-server 2>/dev/null; then
         print_success "Redis started successfully"
         return 0
     fi
-    
+
     # Try alternative service name
     if sudo systemctl start redis 2>/dev/null; then
         print_success "Redis started successfully"
         return 0
     fi
-    
+
     # Try to start Redis manually in the background
     if command -v redis-server >/dev/null 2>&1; then
         print_status "Starting Redis manually..."
@@ -137,7 +137,7 @@ start_redis() {
             return 0
         fi
     fi
-    
+
     print_error "Failed to start Redis. Please ensure Redis is installed and configured."
     return 1
 }
@@ -145,17 +145,17 @@ start_redis() {
 # Function to run the Go application
 run_go_app() {
     print_status "Starting Go application..."
-    
+
     # Change to backend directory
     cd "$(dirname "$0")/backend"
-    
+
     # Check if .env file exists
     if [ ! -f ".env" ]; then
         print_warning ".env file not found in backend directory"
         print_warning "The application will use system environment variables"
         print_warning "Please refer to ENV_SETUP.md for configuration details"
     fi
-    
+
     # Run the Go application
     print_status "Running: go run cmd/api/main.go"
     go run cmd/api/main.go
@@ -165,7 +165,7 @@ run_go_app() {
 main() {
     print_status "Starting DesktopBuilder application..."
     echo
-    
+
     # Check and start PostgreSQL
     if ! check_postgres; then
         if ! start_postgres; then
@@ -176,7 +176,7 @@ main() {
         sleep 3
     fi
     echo
-    
+
     # Check and start Redis
     if ! check_redis; then
         if ! start_redis; then
@@ -187,7 +187,7 @@ main() {
         sleep 2
     fi
     echo
-    
+
     # Run the Go application
     print_status "All dependencies are running. Starting the application..."
     echo

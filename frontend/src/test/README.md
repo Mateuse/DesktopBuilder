@@ -81,6 +81,6 @@ The `setup.ts` file contains:
 ## File Naming Conventions
 
 - `*.test.tsx` - React component tests
-- `*.test.ts` - TypeScript module tests  
+- `*.test.ts` - TypeScript module tests
 - `*.spec.tsx` - Specification/behavior tests
 - `__tests__/` - Alternative directory structure for grouping tests
