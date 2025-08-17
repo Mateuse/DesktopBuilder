@@ -1,0 +1,639 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>api: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/mateuse/desktop-builder-backend/cmd/api/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/mateuse/desktop-builder-backend/internal/handlers/health.handler.go (100.0%)</option>
+				
+				<option value="file2">github.com/mateuse/desktop-builder-backend/internal/routes/health.routes.go (0.0%)</option>
+				
+				<option value="file3">github.com/mateuse/desktop-builder-backend/internal/testutils/testutils.go (0.0%)</option>
+				
+				<option value="file4">github.com/mateuse/desktop-builder-backend/internal/utils/customResponse.util.go (100.0%)</option>
+				
+				<option value="file5">github.com/mateuse/desktop-builder-backend/internal/utils/db.util.go (81.8%)</option>
+				
+				<option value="file6">github.com/mateuse/desktop-builder-backend/internal/utils/redis.util.go (87.8%)</option>
+				
+				<option value="file7">github.com/mateuse/desktop-builder-backend/internal/utils/testutils.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "log"
+        "net/http"
+        "os"
+
+        "github.com/joho/godotenv"
+        "github.com/mateuse/desktop-builder-backend/internal/routes"
+        "github.com/mateuse/desktop-builder-backend/internal/utils"
+)
+
+func withCORS(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+                w.Header().Set("Vary", "Origin")
+                w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
+                w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+                if r.Method == http.MethodOptions </span><span class="cov0" title="0">{
+                        w.WriteHeader(http.StatusNoContent)
+                        return
+                }</span>
+                <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func main() <span class="cov0" title="0">{
+        // Load environment variables from .env file
+        if err := godotenv.Load(); err != nil </span><span class="cov0" title="0">{
+                log.Println("Warning: .env file not found, using system environment variables")
+        }</span>
+
+        // Initialize database connection
+        <span class="cov0" title="0">if err := utils.InitializeDatabase(); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to initialize database: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                if err := utils.CloseDatabase(); err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Error closing database: %v", err)
+                }</span>
+        }()
+
+        // Initialize Redis connection
+        <span class="cov0" title="0">if err := utils.InitializeRedis(); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to initialize Redis: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                if err := utils.CloseRedis(); err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Error closing Redis: %v", err)
+                }</span>
+        }()
+
+        <span class="cov0" title="0">mux := http.NewServeMux()
+        routes.RegisterHealthRoutes(mux)
+
+        // Get port from environment variable or use default
+        port := os.Getenv("PORT")
+        if port == "" </span><span class="cov0" title="0">{
+                port = "8080"
+        }</span>
+
+        <span class="cov0" title="0">log.Printf("Backend is running on port %s", port)
+        if err := http.ListenAndServe(":"+port, withCORS(mux)); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package handlers
+
+import (
+        "net/http"
+
+        "github.com/mateuse/desktop-builder-backend/internal/constants"
+        "github.com/mateuse/desktop-builder-backend/internal/utils"
+)
+
+func HealthHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if r.Method != http.MethodGet </span><span class="cov8" title="1">{
+                utils.WriteError(w, http.StatusMethodNotAllowed, constants.METHOD_NOT_ALLOWED_MESSAGE, nil)
+                return
+        }</span>
+
+        <span class="cov8" title="1">utils.WriteSuccess(w, http.StatusOK, constants.HEALTH_MESSAGE, nil)</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package routes
+
+import (
+        "net/http"
+
+        "github.com/mateuse/desktop-builder-backend/internal/handlers"
+)
+
+func RegisterHealthRoutes(router *http.ServeMux) <span class="cov0" title="0">{
+        router.HandleFunc("/health", handlers.HealthHandler)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package testutils
+
+import (
+        "database/sql"
+        "net/http"
+        "net/http/httptest"
+
+        "github.com/DATA-DOG/go-sqlmock"
+        "github.com/redis/go-redis/v9"
+        "github.com/stretchr/testify/mock"
+)
+
+// MockDB provides utilities for mocking database connections
+type MockDB struct {
+        DB   *sql.DB
+        Mock sqlmock.Sqlmock
+}
+
+// NewMockDB creates a new mock database connection
+func NewMockDB() (*MockDB, error) <span class="cov0" title="0">{
+        db, mock, err := sqlmock.New()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;MockDB{
+                DB:   db,
+                Mock: mock,
+        }, nil</span>
+}
+
+// Close closes the mock database connection
+func (m *MockDB) Close() error <span class="cov0" title="0">{
+        return m.DB.Close()
+}</span>
+
+// MockRedisClient is a mock implementation of Redis client
+type MockRedisClient struct {
+        mock.Mock
+}
+
+// Ping mocks the Redis Ping method
+func (m *MockRedisClient) Ping(ctx interface{}) *redis.StatusCmd <span class="cov0" title="0">{
+        args := m.Called(ctx)
+        return args.Get(0).(*redis.StatusCmd)
+}</span>
+
+// Set mocks the Redis Set method
+func (m *MockRedisClient) Set(ctx interface{}, key string, value interface{}, expiration interface{}) *redis.StatusCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, key, value, expiration)
+        return args.Get(0).(*redis.StatusCmd)
+}</span>
+
+// Get mocks the Redis Get method
+func (m *MockRedisClient) Get(ctx interface{}, key string) *redis.StringCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, key)
+        return args.Get(0).(*redis.StringCmd)
+}</span>
+
+// Del mocks the Redis Del method
+func (m *MockRedisClient) Del(ctx interface{}, keys ...string) *redis.IntCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, keys)
+        return args.Get(0).(*redis.IntCmd)
+}</span>
+
+// Exists mocks the Redis Exists method
+func (m *MockRedisClient) Exists(ctx interface{}, keys ...string) *redis.IntCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, keys)
+        return args.Get(0).(*redis.IntCmd)
+}</span>
+
+// Close mocks the Redis Close method
+func (m *MockRedisClient) Close() error <span class="cov0" title="0">{
+        args := m.Called()
+        return args.Error(0)
+}</span>
+
+// TestServer creates a test HTTP server for integration tests
+func TestServer(handler http.Handler) *httptest.Server <span class="cov0" title="0">{
+        return httptest.NewServer(handler)
+}</span>
+
+// TestRequest creates a test HTTP request
+func TestRequest(method, url string, body interface{}) *http.Request <span class="cov0" title="0">{
+        req := httptest.NewRequest(method, url, nil)
+        req.Header.Set("Content-Type", "application/json")
+        return req
+}</span>
+
+// TestResponseRecorder creates a test HTTP response recorder
+func TestResponseRecorder() *httptest.ResponseRecorder <span class="cov0" title="0">{
+        return httptest.NewRecorder()
+}</pre>
+		
+		<pre class="file" id="file4" style="display: none">package utils
+
+import (
+        "encoding/json"
+        "net/http"
+
+        "github.com/mateuse/desktop-builder-backend/internal/models"
+)
+
+func WriteJSON(w http.ResponseWriter, status int, payload interface{}) <span class="cov8" title="1">{
+        w.Header().Set("Content-Type", "application/json")
+        w.WriteHeader(status)
+        json.NewEncoder(w).Encode(payload)
+}</span>
+
+func WriteSuccess(w http.ResponseWriter, status int, message string, data interface{}) <span class="cov8" title="1">{
+        resp := models.SuccessResponse{
+                Code:    status,
+                Message: message,
+                Data:    data,
+        }
+        WriteJSON(w, status, resp)
+}</span>
+
+func WriteError(w http.ResponseWriter, status int, message string, data interface{}) <span class="cov8" title="1">{
+        resp := models.ErrorResponse{
+                Code:    status,
+                Message: message,
+                Data:    data,
+        }
+        WriteJSON(w, status, resp)
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package utils
+
+import (
+        "database/sql"
+        "fmt"
+        "log"
+        "os"
+
+        _ "github.com/lib/pq"
+)
+
+var DB *sql.DB
+
+// InitializeDatabase initializes the PostgreSQL database connection
+func InitializeDatabase() error <span class="cov8" title="1">{
+        // Get database configuration from environment variables
+        dbHost := os.Getenv("DB_HOST")
+        dbPort := os.Getenv("DB_PORT")
+        dbUser := os.Getenv("DB_USER")
+        dbPassword := os.Getenv("DB_PASSWORD")
+        dbName := os.Getenv("DB_NAME")
+        dbSSLMode := os.Getenv("DB_SSLMODE")
+
+        // Set default values if not provided
+        if dbHost == "" </span><span class="cov8" title="1">{
+                dbHost = "localhost"
+        }</span>
+        <span class="cov8" title="1">if dbPort == "" </span><span class="cov8" title="1">{
+                dbPort = "5432"
+        }</span>
+        <span class="cov8" title="1">if dbSSLMode == "" </span><span class="cov8" title="1">{
+                dbSSLMode = "disable"
+        }</span>
+
+        // Validate required environment variables
+        <span class="cov8" title="1">if dbUser == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("DB_USER environment variable is required")
+        }</span>
+        <span class="cov8" title="1">if dbPassword == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("DB_PASSWORD environment variable is required")
+        }</span>
+        <span class="cov8" title="1">if dbName == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("DB_NAME environment variable is required")
+        }</span>
+
+        // Build connection string
+        <span class="cov8" title="1">connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+                dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode)
+
+        // Open database connection
+        db, err := sql.Open("postgres", connStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to open database connection: %w", err)
+        }</span>
+
+        // Test the connection
+        <span class="cov8" title="1">if err := db.Ping(); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to ping database: %w", err)
+        }</span>
+
+        // Set connection pool settings
+        <span class="cov0" title="0">db.SetMaxOpenConns(25)
+        db.SetMaxIdleConns(5)
+
+        DB = db
+        log.Println("Successfully connected to PostgreSQL database")
+        return nil</span>
+}
+
+// CloseDatabase closes the database connection
+func CloseDatabase() error <span class="cov8" title="1">{
+        if DB != nil </span><span class="cov8" title="1">{
+                return DB.Close()
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetDB returns the database instance
+func GetDB() *sql.DB <span class="cov8" title="1">{
+        return DB
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package utils
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "os"
+        "strconv"
+        "time"
+
+        "github.com/redis/go-redis/v9"
+)
+
+var RedisClient *redis.Client
+
+// InitializeRedis initializes the Redis client connection
+func InitializeRedis() error <span class="cov8" title="1">{
+        // Get Redis configuration from environment variables
+        redisHost := os.Getenv("REDIS_HOST")
+        redisPort := os.Getenv("REDIS_PORT")
+        redisPassword := os.Getenv("REDIS_PASSWORD")
+        redisDBStr := os.Getenv("REDIS_DB")
+
+        // Set default values if not provided
+        if redisHost == "" </span><span class="cov8" title="1">{
+                redisHost = "localhost"
+        }</span>
+        <span class="cov8" title="1">if redisPort == "" </span><span class="cov8" title="1">{
+                redisPort = "6379"
+        }</span>
+
+        // Parse Redis DB number (default to 0)
+        <span class="cov8" title="1">redisDB := 0
+        if redisDBStr != "" </span><span class="cov8" title="1">{
+                var err error
+                redisDB, err = strconv.Atoi(redisDBStr)
+                if err != nil </span><span class="cov8" title="1">{
+                        return fmt.Errorf("invalid REDIS_DB value: %w", err)
+                }</span>
+        }
+
+        // Build Redis address
+        <span class="cov8" title="1">redisAddr := fmt.Sprintf("%s:%s", redisHost, redisPort)
+
+        // Create Redis client
+        rdb := redis.NewClient(&amp;redis.Options{
+                Addr:         redisAddr,
+                Password:     redisPassword, // empty string if no password
+                DB:           redisDB,       // default DB
+                DialTimeout:  10 * time.Second,
+                ReadTimeout:  30 * time.Second,
+                WriteTimeout: 30 * time.Second,
+                PoolSize:     10,
+                PoolTimeout:  30 * time.Second,
+        })
+
+        // Test the connection
+        ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        defer cancel()
+
+        _, err := rdb.Ping(ctx).Result()
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("failed to connect to Redis: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">RedisClient = rdb
+        log.Printf("Successfully connected to Redis at %s", redisAddr)
+        return nil</span>
+}
+
+// CloseRedis closes the Redis connection
+func CloseRedis() error <span class="cov8" title="1">{
+        if RedisClient != nil </span><span class="cov8" title="1">{
+                return RedisClient.Close()
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetRedisClient returns the Redis client instance
+func GetRedisClient() *redis.Client <span class="cov8" title="1">{
+        return RedisClient
+}</span>
+
+// SetWithExpiration sets a key-value pair with expiration
+func SetWithExpiration(ctx context.Context, key string, value interface{}, expiration time.Duration) error <span class="cov8" title="1">{
+        if RedisClient == nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("redis client not initialized")
+        }</span>
+        <span class="cov0" title="0">return RedisClient.Set(ctx, key, value, expiration).Err()</span>
+}
+
+// Get retrieves a value by key
+func Get(ctx context.Context, key string) (string, error) <span class="cov8" title="1">{
+        if RedisClient == nil </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("redis client not initialized")
+        }</span>
+        <span class="cov0" title="0">return RedisClient.Get(ctx, key).Result()</span>
+}
+
+// Delete removes a key
+func Delete(ctx context.Context, key string) error <span class="cov8" title="1">{
+        if RedisClient == nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("redis client not initialized")
+        }</span>
+        <span class="cov0" title="0">return RedisClient.Del(ctx, key).Err()</span>
+}
+
+// Exists checks if a key exists
+func Exists(ctx context.Context, key string) (bool, error) <span class="cov8" title="1">{
+        if RedisClient == nil </span><span class="cov8" title="1">{
+                return false, fmt.Errorf("redis client not initialized")
+        }</span>
+        <span class="cov0" title="0">result, err := RedisClient.Exists(ctx, key).Result()
+        return result &gt; 0, err</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package utils
+
+import (
+        "database/sql"
+        "net/http"
+        "net/http/httptest"
+
+        "github.com/DATA-DOG/go-sqlmock"
+        "github.com/redis/go-redis/v9"
+        "github.com/stretchr/testify/mock"
+)
+
+// MockDB provides utilities for mocking database connections
+type MockDB struct {
+        DB   *sql.DB
+        Mock sqlmock.Sqlmock
+}
+
+// NewMockDB creates a new mock database connection
+func NewMockDB() (*MockDB, error) <span class="cov0" title="0">{
+        db, mock, err := sqlmock.New()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return &amp;MockDB{
+                DB:   db,
+                Mock: mock,
+        }, nil</span>
+}
+
+// Close closes the mock database connection
+func (m *MockDB) Close() error <span class="cov0" title="0">{
+        return m.DB.Close()
+}</span>
+
+// MockRedisClient is a mock implementation of Redis client
+type MockRedisClient struct {
+        mock.Mock
+}
+
+// Ping mocks the Redis Ping method
+func (m *MockRedisClient) Ping(ctx interface{}) *redis.StatusCmd <span class="cov0" title="0">{
+        args := m.Called(ctx)
+        return args.Get(0).(*redis.StatusCmd)
+}</span>
+
+// Set mocks the Redis Set method
+func (m *MockRedisClient) Set(ctx interface{}, key string, value interface{}, expiration interface{}) *redis.StatusCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, key, value, expiration)
+        return args.Get(0).(*redis.StatusCmd)
+}</span>
+
+// Get mocks the Redis Get method
+func (m *MockRedisClient) Get(ctx interface{}, key string) *redis.StringCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, key)
+        return args.Get(0).(*redis.StringCmd)
+}</span>
+
+// Del mocks the Redis Del method
+func (m *MockRedisClient) Del(ctx interface{}, keys ...string) *redis.IntCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, keys)
+        return args.Get(0).(*redis.IntCmd)
+}</span>
+
+// Exists mocks the Redis Exists method
+func (m *MockRedisClient) Exists(ctx interface{}, keys ...string) *redis.IntCmd <span class="cov0" title="0">{
+        args := m.Called(ctx, keys)
+        return args.Get(0).(*redis.IntCmd)
+}</span>
+
+// Close mocks the Redis Close method
+func (m *MockRedisClient) Close() error <span class="cov0" title="0">{
+        args := m.Called()
+        return args.Error(0)
+}</span>
+
+// TestServer creates a test HTTP server for integration tests
+func TestServer(handler http.Handler) *httptest.Server <span class="cov0" title="0">{
+        return httptest.NewServer(handler)
+}</span>
+
+// TestRequest creates a test HTTP request
+func TestRequest(method, url string, body interface{}) *http.Request <span class="cov0" title="0">{
+        req := httptest.NewRequest(method, url, nil)
+        req.Header.Set("Content-Type", "application/json")
+        return req
+}</span>
+
+// TestResponseRecorder creates a test HTTP response recorder
+func TestResponseRecorder() *httptest.ResponseRecorder <span class="cov0" title="0">{
+        return httptest.NewRecorder()
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
