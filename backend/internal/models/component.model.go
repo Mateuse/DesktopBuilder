@@ -11,26 +11,45 @@ import (
 type Category string
 
 const (
-	CategoryCPU           Category = "cpu"
-	CategoryMotherboard   Category = "motherboard"
-	CategoryMemory        Category = "memory"
-	CategoryStorage       Category = "storage"
-	CategoryGPU           Category = "gpu"
-	CategoryPowerSupply   Category = "powersupply"
-	CategoryCase          Category = "case"
-	CategoryCooler        Category = "cooler"
-	CategoryMonitor       Category = "monitor"
-	CategoryExpansionCard Category = "expansioncard"
-	CategoryPeripherals   Category = "peripherals"
-	CategoryOther         Category = "other"
+	CategoryCaseAccessory       Category = "case_accessory"
+	CategoryCaseFan             Category = "case_fan"
+	CategoryCase                Category = "case"
+	CategoryCPUCooler           Category = "cpu_cooler"
+	CategoryCPU                 Category = "cpu"
+	CategoryExternalHDD         Category = "external_hdd"
+	CategoryFanController       Category = "fan_controller"
+	CategoryHeadphone           Category = "headphone"
+	CategoryInternalHDD         Category = "internal_hdd"
+	CategoryKeyboard            Category = "keyboard"
+	CategoryMemory              Category = "memory"
+	CategoryMonitor             Category = "monitor"
+	CategoryMotherboard         Category = "motherboard"
+	CategoryMouse               Category = "mouse"
+	CategoryOpticalDrive        Category = "optical_drive"
+	CategoryOS                  Category = "os"
+	CategoryPowerSupply         Category = "power_supply"
+	CategoryUPS                 Category = "ups"
+	CategorySoundCard           Category = "sound_card"
+	CategorySpeaker             Category = "speaker"
+	CategoryThermalPaste        Category = "thermal_paste"
+	CategoryVideoCard           Category = "video_card"
+	CategoryWebcam              Category = "webcam"
+	CategoryWiredNetworkCard    Category = "wired_network_card"
+	CategoryWirelessNetworkCard Category = "wireless_network_card"
+	CategoryWaterCooling        Category = "water_cooling"
+	CategoryOther               Category = "other"
 )
 
 // Valid returns true if the category is valid
 func (c Category) Valid() bool {
 	switch c {
-	case CategoryCPU, CategoryMotherboard, CategoryMemory, CategoryStorage,
-		CategoryGPU, CategoryPowerSupply, CategoryCase, CategoryCooler,
-		CategoryMonitor, CategoryExpansionCard, CategoryPeripherals, CategoryOther:
+	case CategoryCaseAccessory, CategoryCaseFan, CategoryCase, CategoryCPUCooler,
+		CategoryCPU, CategoryExternalHDD, CategoryFanController, CategoryHeadphone,
+		CategoryInternalHDD, CategoryKeyboard, CategoryMemory, CategoryMonitor,
+		CategoryMotherboard, CategoryMouse, CategoryOpticalDrive, CategoryOS,
+		CategoryPowerSupply, CategoryUPS, CategorySoundCard, CategorySpeaker,
+		CategoryThermalPaste, CategoryVideoCard, CategoryWebcam, CategoryWiredNetworkCard,
+		CategoryWirelessNetworkCard, CategoryWaterCooling, CategoryOther:
 		return true
 	}
 	return false

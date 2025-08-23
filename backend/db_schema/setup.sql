@@ -3,7 +3,33 @@
 
 -- Create custom types
 CREATE TYPE category AS ENUM (
-  'cpu','motherboard','memory','storage','gpu','powersupply','case','cooler','monitor','expansioncard','peripherals','other'
+  'case_accessory',
+  'case_fan',
+  'case',
+  'cpu_cooler',
+  'cpu',
+  'external_hdd',
+  'fan_controller',
+  'headphone',
+  'internal_hdd',
+  'keyboard',
+  'memory',
+  'monitor',
+  'motherboard',
+  'mouse',
+  'optical_drive',
+  'os',
+  'power_supply',
+  'ups',
+  'sound_card',
+  'speaker',
+  'thermal_paste',
+  'video_card',
+  'webcam',
+  'wired_network_card',
+  'wireless_network_card',
+  'water_cooling',
+  'other'
 );
 
 -- Create tables
@@ -83,3 +109,16 @@ CREATE INDEX idx_user_builds_public ON user_builds(is_public);
 CREATE INDEX idx_user_builds_complete ON user_builds(is_complete);
 
 CREATE INDEX idx_build_components_build_id ON build_components(build_id);
+
+-- Grant permissions to database user (replace 'your_db_user' with actual username)
+-- Note: These grants assume the user exists. If running as superuser, these will be applied.
+-- If you get permission errors, run the fix_permissions.sql script as postgres user.
+
+-- Grant usage on all sequences
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO your_db_user;
+
+-- Grant permissions on all tables
+-- GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO your_db_user;
+
+-- Grant schema usage permission
+-- GRANT USAGE ON SCHEMA public TO your_db_user;

@@ -53,6 +53,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	routes.RegisterHealthRoutes(mux)
+	routes.RegisterComponentRoutes(mux)
 
 	// Get port from environment variable or use default
 	port := os.Getenv("PORT")

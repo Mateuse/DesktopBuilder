@@ -1,0 +1,62 @@
+package constants
+
+const (
+	// Handler log messages
+	HANDLER_GET_COMPONENTS_START               = "Starting GetComponentsHandler"
+	HANDLER_METHOD_NOT_ALLOWED                 = "Method not allowed for GetComponentsHandler"
+	HANDLER_GET_COMPONENT_BY_ID_START          = "Getting component by ID: %s"
+	HANDLER_GET_COMPONENT_BY_ID_ERROR          = "Error getting component by ID: %s"
+	HANDLER_GET_COMPONENT_BY_ID_NOT_FOUND      = "Component not found by ID: %s"
+	HANDLER_GET_COMPONENT_BY_ID_SUCCESS        = "Successfully retrieved component by ID: %s"
+	HANDLER_GET_COMPONENTS_BY_BRAND_START      = "Getting components by brand - Category: %s, Brand: %s"
+	HANDLER_GET_COMPONENTS_BY_BRAND_ERROR      = "Error getting components by brand - Category: %s, Brand: %s"
+	HANDLER_GET_COMPONENTS_BY_BRAND_SUCCESS    = "Successfully retrieved components by brand - Category: %s, Brand: %s"
+	HANDLER_GET_COMPONENTS_BY_CATEGORY_START   = "Getting components by category: %s"
+	HANDLER_GET_COMPONENTS_BY_CATEGORY_ERROR   = "Error getting components by category: %s"
+	HANDLER_GET_COMPONENTS_BY_CATEGORY_SUCCESS = "Successfully retrieved components by category: %s"
+	HANDLER_GET_ALL_COMPONENTS_START           = "Getting all components"
+	HANDLER_GET_ALL_COMPONENTS_ERROR           = "Error getting all components"
+	HANDLER_GET_ALL_COMPONENTS_SUCCESS         = "Successfully retrieved all components"
+
+	// Service log messages
+	SERVICE_GET_ALL_COMPONENTS_START           = "Service: Getting all components"
+	SERVICE_GET_ALL_COMPONENTS_ERROR           = "Service: Error getting all components"
+	SERVICE_GET_ALL_COMPONENTS_SUCCESS         = "Service: Successfully retrieved all components"
+	SERVICE_GET_COMPONENTS_BY_CATEGORY_START   = "Service: Getting components by category: %s"
+	SERVICE_GET_COMPONENTS_BY_CATEGORY_ERROR   = "Service: Error getting components by category: %s"
+	SERVICE_GET_COMPONENTS_BY_CATEGORY_SUCCESS = "Service: Successfully retrieved components by category: %s"
+	SERVICE_GET_COMPONENTS_BY_BRAND_START      = "Service: Getting components by brand - Category: %s, Brand: %s"
+	SERVICE_GET_COMPONENTS_BY_BRAND_ERROR      = "Service: Error getting components by brand - Category: %s, Brand: %s"
+	SERVICE_GET_COMPONENTS_BY_BRAND_SUCCESS    = "Service: Successfully retrieved components by brand - Category: %s, Brand: %s"
+	SERVICE_GET_COMPONENT_BY_ID_START          = "Service: Getting component by ID: %s"
+	SERVICE_GET_COMPONENT_BY_ID_ERROR          = "Service: Error getting component by ID: %s"
+	SERVICE_GET_COMPONENT_BY_ID_SUCCESS        = "Service: Successfully retrieved component by ID: %s"
+
+	// Repository log messages
+	REPOSITORY_GET_ALL_COMPONENTS_START               = "Repository: Getting all components"
+	REPOSITORY_GET_ALL_COMPONENTS_QUERY_ERROR         = "Repository: Error generating query for all components"
+	REPOSITORY_GET_ALL_COMPONENTS_DB_ERROR            = "Repository: Database error getting all components"
+	REPOSITORY_GET_ALL_COMPONENTS_SCAN_ERROR          = "Repository: Error scanning component row"
+	REPOSITORY_GET_ALL_COMPONENTS_SUCCESS             = "Repository: Successfully retrieved %d components"
+	REPOSITORY_GET_COMPONENTS_BY_CATEGORY_START       = "Repository: Getting components by category: %s"
+	REPOSITORY_GET_COMPONENTS_BY_CATEGORY_QUERY_ERROR = "Repository: Error generating query for components by category: %s"
+	REPOSITORY_GET_COMPONENTS_BY_CATEGORY_DB_ERROR    = "Repository: Database error getting components by category: %s"
+	REPOSITORY_GET_COMPONENTS_BY_CATEGORY_SCAN_ERROR  = "Repository: Error scanning component row for category: %s"
+	REPOSITORY_GET_COMPONENTS_BY_CATEGORY_SUCCESS     = "Repository: Successfully retrieved %d components for category: %s"
+	REPOSITORY_GET_COMPONENTS_BY_BRAND_START          = "Repository: Getting components by brand - Category: %s, Brand: %s"
+	REPOSITORY_GET_COMPONENTS_BY_BRAND_QUERY_ERROR    = "Repository: Error generating query for components by brand - Category: %s, Brand: %s"
+	REPOSITORY_GET_COMPONENTS_BY_BRAND_DB_ERROR       = "Repository: Database error getting components by brand - Category: %s, Brand: %s"
+	REPOSITORY_GET_COMPONENTS_BY_BRAND_SCAN_ERROR     = "Repository: Error scanning component row for brand - Category: %s, Brand: %s"
+	REPOSITORY_GET_COMPONENTS_BY_BRAND_SUCCESS        = "Repository: Successfully retrieved %d components for brand - Category: %s, Brand: %s"
+	REPOSITORY_GET_COMPONENT_BY_ID_START              = "Repository: Getting component by ID: %s"
+	REPOSITORY_GET_COMPONENT_BY_ID_QUERY_ERROR        = "Repository: Error generating query for component by ID: %s"
+	REPOSITORY_GET_COMPONENT_BY_ID_DB_ERROR           = "Repository: Database error getting component by ID: %s"
+	REPOSITORY_GET_COMPONENT_BY_ID_SCAN_ERROR         = "Repository: Error scanning component row for ID: %s"
+	REPOSITORY_GET_COMPONENT_BY_ID_SUCCESS            = "Repository: Successfully retrieved component by ID: %s"
+
+	// Database utility log messages
+	DB_UTIL_GENERATE_SELECT_QUERY_START   = "Generating select query for table: %s"
+	DB_UTIL_GENERATE_SELECT_QUERY_SUCCESS = "Successfully generated select query for table: %s"
+	DB_UTIL_GET_DB_CONNECTION_SUCCESS     = "Database connection retrieved successfully"
+	DB_UTIL_GET_DB_CONNECTION_ERROR       = "Error getting database connection"
+)

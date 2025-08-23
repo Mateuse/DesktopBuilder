@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
+	"github.com/mateuse/desktop-builder-backend/internal/constants"
+	"github.com/mateuse/desktop-builder-backend/internal/models"
 )
 
 var DB *sql.DB
@@ -77,5 +80,28 @@ func CloseDatabase() error {
 
 // GetDB returns the database instance
 func GetDB() *sql.DB {
+	if DB != nil {
+		Log(constants.DB_UTIL_GET_DB_CONNECTION_SUCCESS, nil)
+	} else {
+		Log(constants.DB_UTIL_GET_DB_CONNECTION_ERROR, fmt.Errorf("database connection is nil"))
+	}
 	return DB
+}
+
+func GenerateSelectQuery(input models.GenerateSelectQueryInput) (string, error) {
+	Log(constants.DB_UTIL_GENERATE_SELECT_QUERY_START, nil, input.Table)
+
+	columns := input.Columns
+	if len(columns) == 0 {
+		columns = []string{"*"}
+	}
+
+	query := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columns, ", "), input.Table)
+
+	if input.WhereClause != "" {
+		query += fmt.Sprintf(" WHERE %s", input.WhereClause)
+	}
+
+	Log(constants.DB_UTIL_GENERATE_SELECT_QUERY_SUCCESS, nil, input.Table)
+	return query, nil
 }

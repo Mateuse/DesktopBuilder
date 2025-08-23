@@ -1,0 +1,5 @@
+2025/08/22 20:35:58 Successfully connected to PostgreSQL database
+2025/08/22 20:35:58 Successfully connected to Redis at localhost:6379
+2025/08/22 20:35:58 Backend is running on port 8080
+2025/08/22 20:35:58 listen tcp :8080: bind: address already in use
+exit status 1
