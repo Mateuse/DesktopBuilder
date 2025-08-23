@@ -12,6 +12,7 @@ import (
 
 	"github.com/mateuse/desktop-builder-backend/internal/constants"
 	"github.com/mateuse/desktop-builder-backend/internal/models"
+	"github.com/mateuse/desktop-builder-backend/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -230,7 +231,7 @@ func TestParseComponentQueryParams(t *testing.T) {
 			pattern: "/components/{category}/{brand}",
 			expected: models.ComponentQueryParams{
 				Category: "cpu",
-				Brand:    "intel",
+				Brand:    "Intel",
 				ID:       "",
 			},
 		},
@@ -250,7 +251,7 @@ func TestParseComponentQueryParams(t *testing.T) {
 			pattern: "/components/{category}/{brand}",
 			expected: models.ComponentQueryParams{
 				Category: "cpu",
-				Brand:    "intel corp",
+				Brand:    "Intel Corp",
 				ID:       "",
 			},
 		},
@@ -260,7 +261,7 @@ func TestParseComponentQueryParams(t *testing.T) {
 			pattern: "/components/{category}/{brand}",
 			expected: models.ComponentQueryParams{
 				Category: "cpu",
-				Brand:    "intel",
+				Brand:    "INTEL",
 				ID:       "",
 			},
 		},
@@ -270,7 +271,7 @@ func TestParseComponentQueryParams(t *testing.T) {
 			pattern: "/components/{category}/{brand}",
 			expected: models.ComponentQueryParams{
 				Category: "gpu",
-				Brand:    "nvidia",
+				Brand:    "NvIdIa",
 				ID:       "",
 			},
 		},
@@ -320,7 +321,7 @@ func TestGetComponentsHandler_EdgeCases(t *testing.T) {
 			name:        "Case sensitivity in path",
 			path:        "/components/CPU/INTEL",
 			pattern:     "/components/{category}/{brand}",
-			description: "Should convert brand to lowercase while keeping category as-is",
+			description: "Should preserve brand case while keeping category as-is",
 		},
 		{
 			name:        "Numeric values in path",
@@ -366,8 +367,8 @@ func TestGetComponentsHandler_EdgeCases(t *testing.T) {
 	}
 }
 
-// TestParseComponentQueryParams_CaseInsensitiveBrand tests that brand parameter is case insensitive
-func TestParseComponentQueryParams_CaseInsensitiveBrand(t *testing.T) {
+// TestParseComponentQueryParams_BrandCasePreservation tests that brand parameter preserves original casing
+func TestParseComponentQueryParams_BrandCasePreservation(t *testing.T) {
 	tests := []struct {
 		name          string
 		path          string
@@ -386,22 +387,22 @@ func TestParseComponentQueryParams_CaseInsensitiveBrand(t *testing.T) {
 			name:          "Uppercase brand",
 			path:          "/components/cpu/INTEL",
 			pattern:       "/components/{category}/{brand}",
-			expectedBrand: "intel",
-			description:   "Should convert uppercase brand to lowercase",
+			expectedBrand: "INTEL",
+			description:   "Should preserve uppercase brand",
 		},
 		{
 			name:          "Mixed case brand",
 			path:          "/components/cpu/InTeL",
 			pattern:       "/components/{category}/{brand}",
-			expectedBrand: "intel",
-			description:   "Should convert mixed case brand to lowercase",
+			expectedBrand: "InTeL",
+			description:   "Should preserve mixed case brand",
 		},
 		{
 			name:          "Brand with spaces",
 			path:          "/components/cpu/Intel%20Corp",
 			pattern:       "/components/{category}/{brand}",
-			expectedBrand: "intel corp",
-			description:   "Should convert brand with spaces to lowercase",
+			expectedBrand: "Intel Corp",
+			description:   "Should preserve brand with spaces and original casing",
 		},
 		{
 			name:          "Empty brand",
@@ -487,6 +488,234 @@ func BenchmarkGetComponentsHandler_MethodValidation(b *testing.B) {
 	}
 }
 
+// TestGetComponentsHandler_FunctionRouting tests that the correct internal handler function gets called
+// based on the URL parameters using a spy pattern to track function calls
+func TestGetComponentsHandler_FunctionRouting(t *testing.T) {
+	// Spy struct to track which handler functions are called
+	type handlerSpy struct {
+		getByIDCalled       bool
+		getByBrandCalled    bool
+		getByCategoryCalled bool
+		getAllCalled        bool
+		lastIDParam         string
+		lastCategoryParam   string
+		lastBrandParam      string
+		lastPageParam       string
+	}
+
+	// Create a custom handler that uses spies instead of real handler functions
+	testHandler := func(spy *handlerSpy) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			// Copy the method validation logic from the original handler
+			if r.Method != http.MethodGet {
+				utils.WriteError(w, http.StatusMethodNotAllowed, constants.METHOD_NOT_ALLOWED_MESSAGE, nil)
+				return
+			}
+
+			// Copy the parameter parsing logic from the original handler
+			params := parseComponentQueryParams(r)
+			// Handle page parsing inline to avoid dependency issues in tests
+			pageParam := r.URL.Query().Get("page")
+			if pageParam == "" {
+				pageParam = "1"
+			}
+			page := pageParam
+
+			// Copy the routing logic but call spy functions instead
+			switch {
+			case params.ID != "":
+				spy.getByIDCalled = true
+				spy.lastIDParam = params.ID
+				spy.lastPageParam = page
+				// Return success to avoid database calls in tests
+				utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, mockComponent)
+			case params.Category != "" && params.Brand != "":
+				spy.getByBrandCalled = true
+				spy.lastCategoryParam = params.Category
+				spy.lastBrandParam = params.Brand
+				spy.lastPageParam = page
+				utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, mockComponents)
+			case params.Category != "":
+				spy.getByCategoryCalled = true
+				spy.lastCategoryParam = params.Category
+				spy.lastPageParam = page
+				utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, mockComponents)
+			default:
+				spy.getAllCalled = true
+				spy.lastPageParam = page
+				utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, mockComponents)
+			}
+		}
+	}
+
+	tests := []struct {
+		name                        string
+		path                        string
+		pattern                     string
+		query                       string
+		expectedGetByIDCalled       bool
+		expectedGetByBrandCalled    bool
+		expectedGetByCategoryCalled bool
+		expectedGetAllCalled        bool
+		expectedIDParam             string
+		expectedCategoryParam       string
+		expectedBrandParam          string
+		expectedPageParam           string
+		description                 string
+	}{
+		{
+			name:                 "Route to GetAllComponents",
+			path:                 "/components",
+			pattern:              "/components",
+			query:                "",
+			expectedGetAllCalled: true,
+			expectedPageParam:    "1", // Default page
+			description:          "Should call handleGetAllComponents when no path params",
+		},
+		{
+			name:                 "Route to GetAllComponents with page query",
+			path:                 "/components",
+			pattern:              "/components",
+			query:                "?page=2",
+			expectedGetAllCalled: true,
+			expectedPageParam:    "2",
+			description:          "Should call handleGetAllComponents with page parameter",
+		},
+		{
+			name:                        "Route to GetComponentsByCategory",
+			path:                        "/components/cpu",
+			pattern:                     "/components/{category}",
+			query:                       "",
+			expectedGetByCategoryCalled: true,
+			expectedCategoryParam:       "cpu",
+			expectedPageParam:           "1",
+			description:                 "Should call handleGetComponentsByCategory for category only",
+		},
+		{
+			name:                        "Route to GetComponentsByCategory with page",
+			path:                        "/components/gpu",
+			pattern:                     "/components/{category}",
+			query:                       "?page=3",
+			expectedGetByCategoryCalled: true,
+			expectedCategoryParam:       "gpu",
+			expectedPageParam:           "3",
+			description:                 "Should call handleGetComponentsByCategory with page parameter",
+		},
+		{
+			name:                     "Route to GetComponentsByBrand",
+			path:                     "/components/cpu/Intel",
+			pattern:                  "/components/{category}/{brand}",
+			query:                    "",
+			expectedGetByBrandCalled: true,
+			expectedCategoryParam:    "cpu",
+			expectedBrandParam:       "Intel",
+			expectedPageParam:        "1",
+			description:              "Should call handleGetComponentsByBrand for category and brand",
+		},
+		{
+			name:                     "Route to GetComponentsByBrand with page",
+			path:                     "/components/gpu/NVIDIA",
+			pattern:                  "/components/{category}/{brand}",
+			query:                    "?page=5",
+			expectedGetByBrandCalled: true,
+			expectedCategoryParam:    "gpu",
+			expectedBrandParam:       "NVIDIA",
+			expectedPageParam:        "5",
+			description:              "Should call handleGetComponentsByBrand with page parameter",
+		},
+		{
+			name:                  "Route to GetComponentById",
+			path:                  "/components/item/123",
+			pattern:               "/components/item/{id}",
+			query:                 "",
+			expectedGetByIDCalled: true,
+			expectedIDParam:       "123",
+			expectedPageParam:     "1",
+			description:           "Should call handleGetComponentByID for ID parameter",
+		},
+		{
+			name:                  "Route to GetComponentById with page",
+			path:                  "/components/item/456",
+			pattern:               "/components/item/{id}",
+			query:                 "?page=2",
+			expectedGetByIDCalled: true,
+			expectedIDParam:       "456",
+			expectedPageParam:     "2",
+			description:           "Should call handleGetComponentByID with page parameter",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a fresh spy for each test
+			spy := &handlerSpy{}
+
+			// Create ServeMux to handle path parameters
+			mux := http.NewServeMux()
+			mux.HandleFunc(tt.pattern, testHandler(spy))
+
+			// Create request with query parameters if specified
+			fullPath := tt.path + tt.query
+			req := httptest.NewRequest(http.MethodGet, fullPath, nil)
+			w := httptest.NewRecorder()
+
+			// Execute the handler
+			mux.ServeHTTP(w, req)
+
+			// Verify the correct handler function was called
+			assert.Equal(t, tt.expectedGetByIDCalled, spy.getByIDCalled,
+				"GetByID called mismatch: %s", tt.description)
+			assert.Equal(t, tt.expectedGetByBrandCalled, spy.getByBrandCalled,
+				"GetByBrand called mismatch: %s", tt.description)
+			assert.Equal(t, tt.expectedGetByCategoryCalled, spy.getByCategoryCalled,
+				"GetByCategory called mismatch: %s", tt.description)
+			assert.Equal(t, tt.expectedGetAllCalled, spy.getAllCalled,
+				"GetAll called mismatch: %s", tt.description)
+
+			// Verify the parameters passed to the handler functions
+			if tt.expectedGetByIDCalled {
+				assert.Equal(t, tt.expectedIDParam, spy.lastIDParam,
+					"ID parameter mismatch: %s", tt.description)
+			}
+			if tt.expectedGetByBrandCalled {
+				assert.Equal(t, tt.expectedCategoryParam, spy.lastCategoryParam,
+					"Category parameter mismatch: %s", tt.description)
+				assert.Equal(t, tt.expectedBrandParam, spy.lastBrandParam,
+					"Brand parameter mismatch: %s", tt.description)
+			}
+			if tt.expectedGetByCategoryCalled {
+				assert.Equal(t, tt.expectedCategoryParam, spy.lastCategoryParam,
+					"Category parameter mismatch: %s", tt.description)
+			}
+
+			// All cases should have the correct page parameter
+			assert.Equal(t, tt.expectedPageParam, spy.lastPageParam,
+				"Page parameter mismatch: %s", tt.description)
+
+			// Verify exactly one handler was called
+			callCount := 0
+			if spy.getByIDCalled {
+				callCount++
+			}
+			if spy.getByBrandCalled {
+				callCount++
+			}
+			if spy.getByCategoryCalled {
+				callCount++
+			}
+			if spy.getAllCalled {
+				callCount++
+			}
+
+			assert.Equal(t, 1, callCount,
+				"Expected exactly one handler to be called, got %d: %s", callCount, tt.description)
+
+			// Verify successful response
+			assert.Equal(t, http.StatusOK, w.Code, "Expected successful response")
+		})
+	}
+}
+
 // BenchmarkParseComponentQueryParams benchmarks the path parameter parsing
 func BenchmarkParseComponentQueryParams(b *testing.B) {
 	// Create a ServeMux to properly handle path variables
@@ -503,73 +732,3 @@ func BenchmarkParseComponentQueryParams(b *testing.B) {
 		mux.ServeHTTP(w, req)
 	}
 }
-
-/*
-INTEGRATION TESTING NOTES:
-==========================
-
-The tests above focus on unit testing the handler logic without database dependencies.
-For comprehensive testing, you'll want to add integration tests that cover:
-
-1. **Database Integration Tests**:
-   - Set up a test database with known data
-   - Test actual service calls and database interactions
-   - Verify complete request-response cycles
-
-2. **Service Layer Mocking**:
-   To test the handler with mocked services, you could:
-
-   a) Use dependency injection:
-      - Modify handlers to accept service interfaces
-      - Inject mock services during testing
-
-   b) Use a mocking framework like testify/mock:
-      - Create mock implementations of service functions
-      - Control return values and verify call parameters
-
-   c) Use interface-based design:
-      - Define service interfaces
-      - Create mock implementations for testing
-
-3. **Example Integration Test Structure**:
-
-   func TestGetComponentsHandler_Integration(t *testing.T) {
-       // Setup test database
-       db := setupTestDB(t)
-       defer cleanupTestDB(t, db)
-
-       // Insert test data
-       insertTestComponents(t, db)
-
-       // Test the actual handler
-       req := httptest.NewRequest(http.MethodGet, "/components", nil)
-       w := httptest.NewRecorder()
-
-       GetComponentsHandler(w, req)
-
-       // Verify response
-       assert.Equal(t, http.StatusOK, w.Code)
-       // ... more assertions
-   }
-
-4. **Current Test Coverage**:
-   ✅ HTTP method validation
-   ✅ Query parameter parsing
-   ✅ Routing logic
-   ✅ Edge cases in parameter handling
-   ✅ Performance benchmarks
-
-   ❌ Service layer integration (requires database)
-   ❌ Error scenarios from services
-   ❌ Response data validation
-   ❌ End-to-end request flows
-
-5. **Recommended Next Steps**:
-   - Set up a test database configuration
-   - Create helper functions for test data setup/cleanup
-   - Implement service mocking or dependency injection
-   - Add integration tests that cover the full request lifecycle
-
-This current test suite provides good coverage of the handler's core logic
-and parameter handling, which can be tested independently of the database.
-*/

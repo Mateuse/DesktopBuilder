@@ -68,7 +68,7 @@ func TestQueryGeneration(t *testing.T) {
 				Columns:     constants.COMPONENTS_SELECT_COLUMNS,
 				WhereClause: "",
 			},
-			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components",
+			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components LIMIT 50",
 			description:   "Should generate query for all components",
 		},
 		{
@@ -78,7 +78,7 @@ func TestQueryGeneration(t *testing.T) {
 				Columns:     constants.COMPONENTS_SELECT_COLUMNS,
 				WhereClause: "category = 'cpu'",
 			},
-			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components WHERE category = 'cpu'",
+			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components WHERE category = 'cpu' LIMIT 50",
 			description:   "Should generate query with category filter",
 		},
 		{
@@ -88,7 +88,7 @@ func TestQueryGeneration(t *testing.T) {
 				Columns:     constants.COMPONENTS_SELECT_COLUMNS,
 				WhereClause: "category = 'cpu' AND brand = 'Intel'",
 			},
-			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components WHERE category = 'cpu' AND brand = 'Intel'",
+			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components WHERE category = 'cpu' AND brand = 'Intel' LIMIT 50",
 			description:   "Should generate query with category and brand filter",
 		},
 		{
@@ -98,7 +98,7 @@ func TestQueryGeneration(t *testing.T) {
 				Columns:     constants.COMPONENTS_SELECT_COLUMNS,
 				WhereClause: "id = '1'",
 			},
-			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components WHERE id = '1'",
+			expectedQuery: "SELECT id, category, brand, model, sku, upc, specs, created_at FROM components WHERE id = '1' LIMIT 50",
 			description:   "Should generate query with ID filter",
 		},
 	}
@@ -188,22 +188,22 @@ func TestWhereClauseGeneration(t *testing.T) {
 // TestRepositoryFunctionSignatures tests that all repository functions have correct signatures
 func TestRepositoryFunctionSignatures(t *testing.T) {
 	t.Run("GetAllComponents signature", func(t *testing.T) {
-		var fn func() ([]models.Component, error) = GetAllComponents
+		var fn func(models.GetAllComponentsInput) ([]models.Component, error) = GetAllComponents
 		assert.NotNil(t, fn)
 	})
 
 	t.Run("GetComponentsByCategory signature", func(t *testing.T) {
-		var fn func(string) ([]models.Component, error) = GetComponentsByCategory
+		var fn func(models.GetComponentsByCategoryInput) ([]models.Component, error) = GetComponentsByCategory
 		assert.NotNil(t, fn)
 	})
 
 	t.Run("GetComponentsByBrand signature", func(t *testing.T) {
-		var fn func(string, string) ([]models.Component, error) = GetComponentsByBrand
+		var fn func(models.GetComponentsByBrandInput) ([]models.Component, error) = GetComponentsByBrand
 		assert.NotNil(t, fn)
 	})
 
 	t.Run("GetComponentById signature", func(t *testing.T) {
-		var fn func(string) (models.Component, error) = GetComponentById
+		var fn func(models.GetComponentByIdInput) (models.Component, error) = GetComponentById
 		assert.NotNil(t, fn)
 	})
 }
@@ -381,91 +381,3 @@ func BenchmarkQueryGeneration(b *testing.B) {
 		}
 	}
 }
-
-/*
-REPOSITORY LAYER TESTING NOTES:
-================================
-
-⚠️  IMPORTANT: These tests DO NOT test actual data retrieval!
-These are UNIT TESTS that focus on query generation logic without database execution.
-
-For actual data retrieval testing, see: component.repository_integration_test.go
-
-UNIT TEST Coverage (this file):
-✅ Query generation logic
-✅ Where clause construction
-✅ Function signatures validation
-✅ Constants verification
-✅ SQL injection awareness tests
-✅ Component scanning structure validation
-✅ Performance benchmarks
-
-MISSING Coverage (requires integration tests):
-❌ Actual database queries execution
-❌ Data retrieval correctness
-❌ Row scanning and data mapping
-❌ Error handling for database failures
-❌ Result filtering validation
-❌ Data integrity verification
-❌ Performance with real data
-
-Security Concerns Identified:
-⚠️  SQL Injection Vulnerability:
-   The current implementation uses string concatenation for WHERE clauses,
-   which is vulnerable to SQL injection attacks.
-
-   Example vulnerable code:
-   ```go
-   whereClause := fmt.Sprintf("category = '%s'", category)
-   ```
-
-   Recommended fix:
-   ```go
-   query := "SELECT ... FROM components WHERE category = $1"
-   rows, err := db.Query(query, category)
-   ```
-
-Recommendations for Production:
-
-1. **Use Parameterized Queries**:
-   Replace string concatenation with parameterized queries to prevent SQL injection.
-
-2. **Add Input Validation**:
-   Validate inputs before using them in queries.
-
-3. **Integration Testing**:
-   Set up test database for full integration testing:
-   ```go
-   func setupTestDB(t *testing.T) *sql.DB {
-       // Set up test database
-   }
-
-   func TestGetAllComponents_Integration(t *testing.T) {
-       db := setupTestDB(t)
-       defer cleanupTestDB(t, db)
-
-       // Insert test data
-       // Run actual queries
-       // Verify results
-   }
-   ```
-
-4. **Error Handling Tests**:
-   Test various database error scenarios.
-
-5. **Performance Testing**:
-   Test with large datasets to ensure queries perform well.
-
-6. **Connection Pool Testing**:
-   Test behavior under high concurrency.
-
-Current Approach:
-These tests focus on the testable parts without external dependencies:
-- Query generation and construction logic
-- Input parameter handling
-- Security awareness and documentation
-- Performance benchmarking of pure functions
-
-For production readiness, implement parameterized queries and add
-comprehensive integration tests with a test database.
-*/

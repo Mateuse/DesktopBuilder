@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	_ "github.com/lib/pq"
@@ -96,12 +97,46 @@ func GenerateSelectQuery(input models.GenerateSelectQueryInput) (string, error) 
 		columns = []string{"*"}
 	}
 
+	limitAndOffset := generateLimitAndOffset(input.Page)
+
 	query := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columns, ", "), input.Table)
 
 	if input.WhereClause != "" {
 		query += fmt.Sprintf(" WHERE %s", input.WhereClause)
 	}
 
+	if limitAndOffset.Limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", limitAndOffset.Limit)
+	}
+
+	if limitAndOffset.Offset > 0 {
+		query += fmt.Sprintf(" OFFSET %d", limitAndOffset.Offset)
+	}
+
 	Log(constants.DB_UTIL_GENERATE_SELECT_QUERY_SUCCESS, nil, input.Table)
 	return query, nil
+}
+
+func generateLimitAndOffset(page string) constants.LimitAndOffset {
+	if page == "" || page == "0" {
+		return constants.LimitAndOffset{
+			Limit:  constants.DEFAULT_PAGE_SIZE,
+			Offset: 0,
+		}
+	}
+
+	pageNum, err := strconv.Atoi(page)
+
+	if err != nil {
+		Log(constants.PAGE_NUMBER_INVALID_MESSAGE, err)
+		return constants.LimitAndOffset{
+			Limit:  constants.DEFAULT_PAGE_SIZE,
+			Offset: 0,
+		}
+	}
+
+	return constants.LimitAndOffset{
+		Limit:  constants.DEFAULT_PAGE_SIZE,
+		Offset: (pageNum - 1) * constants.DEFAULT_PAGE_SIZE,
+	}
 }

@@ -22,7 +22,9 @@ func TestGetAllComponents_Integration(t *testing.T) {
 	insertedIDs := testutils.InsertTestComponents(t, db, testComponents)
 
 	// Test the actual repository function
-	result, err := GetAllComponents()
+	result, err := GetAllComponents(models.GetAllComponentsInput{
+		Page: "1",
+	})
 
 	// Verify no errors
 	require.NoError(t, err, "GetAllComponents should not return an error")
@@ -65,7 +67,9 @@ func TestGetComponentsByCategory_Integration(t *testing.T) {
 	}
 
 	// Test filtering by CPU category
-	cpuComponents, err := GetComponentsByCategory("cpu")
+	cpuComponents, err := GetComponentsByCategory(models.GetComponentsByCategoryInput{
+		Category: "cpu",
+	})
 
 	// Verify no errors
 	require.NoError(t, err, "GetComponentsByCategory should not return an error")
@@ -82,7 +86,9 @@ func TestGetComponentsByCategory_Integration(t *testing.T) {
 	}
 
 	// Test with a category that shouldn't exist
-	emptyResults, err := GetComponentsByCategory("nonexistent_category")
+	emptyResults, err := GetComponentsByCategory(models.GetComponentsByCategoryInput{
+		Category: "nonexistent_category",
+	})
 	require.NoError(t, err, "Should not error on nonexistent category")
 
 	// Should return empty slice, not nil
@@ -102,7 +108,10 @@ func TestGetComponentsByBrand_Integration(t *testing.T) {
 	testutils.InsertTestComponents(t, db, testComponents)
 
 	// Test filtering by CPU + Intel brand
-	intelCPUs, err := GetComponentsByBrand("cpu", "Test Intel")
+	intelCPUs, err := GetComponentsByBrand(models.GetComponentsByBrandInput{
+		Category: "cpu",
+		Brand:    "Test Intel",
+	})
 
 	// Verify no errors
 	require.NoError(t, err, "GetComponentsByBrand should not return an error")
@@ -118,12 +127,18 @@ func TestGetComponentsByBrand_Integration(t *testing.T) {
 	}
 
 	// Test with brand that exists but wrong category
-	wrongCategoryResults, err := GetComponentsByBrand("memory", "Test Intel")
+	wrongCategoryResults, err := GetComponentsByBrand(models.GetComponentsByBrandInput{
+		Category: "memory",
+		Brand:    "Test Intel",
+	})
 	require.NoError(t, err, "Should not error on valid brand with wrong category")
 	assert.Empty(t, wrongCategoryResults, "Should return no results for Intel memory")
 
 	// Test with nonexistent brand
-	nonexistentResults, err := GetComponentsByBrand("cpu", "Nonexistent Brand")
+	nonexistentResults, err := GetComponentsByBrand(models.GetComponentsByBrandInput{
+		Category: "cpu",
+		Brand:    "Nonexistent Brand",
+	})
 	require.NoError(t, err, "Should not error on nonexistent brand")
 	assert.Empty(t, nonexistentResults, "Should return no results for nonexistent brand")
 
@@ -141,7 +156,10 @@ func TestGetComponentById_Integration(t *testing.T) {
 
 	// Test retrieving a specific component
 	targetID := insertedIDs[0]
-	component, err := GetComponentById(fmt.Sprintf("%d", targetID))
+	component, err := GetComponentById(models.GetComponentByIdInput{
+		ID:   fmt.Sprintf("%d", targetID),
+		Page: "1",
+	})
 
 	// Verify no errors
 	require.NoError(t, err, "GetComponentById should not return an error")
@@ -161,11 +179,17 @@ func TestGetComponentById_Integration(t *testing.T) {
 	assert.Equal(t, originalComponent.Model, component.Model, "Model should match")
 
 	// Test retrieving nonexistent component
-	_, err = GetComponentById("99999")
+	_, err = GetComponentById(models.GetComponentByIdInput{
+		ID:   "99999",
+		Page: "1",
+	})
 	assert.Error(t, err, "Should return error for nonexistent component")
 
 	// Test with invalid ID format
-	_, err = GetComponentById("invalid_id")
+	_, err = GetComponentById(models.GetComponentByIdInput{
+		ID:   "invalid_id",
+		Page: "1",
+	})
 	assert.Error(t, err, "Should return error for invalid ID format")
 
 	t.Logf("Successfully retrieved component with ID: %d", targetID)
@@ -205,7 +229,10 @@ func TestComponentDataIntegrity_Integration(t *testing.T) {
 	componentID := testutils.InsertTestComponent(t, db, testComponent)
 
 	// Retrieve it back
-	retrievedComponent, err := GetComponentById(fmt.Sprintf("%d", componentID))
+	retrievedComponent, err := GetComponentById(models.GetComponentByIdInput{
+		ID:   fmt.Sprintf("%d", componentID),
+		Page: "1",
+	})
 	require.NoError(t, err, "Should retrieve complex component without error")
 
 	// Verify JSON specs integrity
@@ -247,7 +274,10 @@ func TestRepositoryErrorHandling_Integration(t *testing.T) {
 
 	for _, malformedID := range malformedIDs {
 		t.Run("Malformed ID: "+malformedID, func(t *testing.T) {
-			_, err := GetComponentById(malformedID)
+			_, err := GetComponentById(models.GetComponentByIdInput{
+				ID:   malformedID,
+				Page: "1",
+			})
 			// Should either return an error or handle gracefully
 			// The exact behavior depends on your error handling strategy
 			t.Logf("GetComponentById('%s') returned error: %v", malformedID, err)
@@ -269,7 +299,10 @@ func TestRepositoryErrorHandling_Integration(t *testing.T) {
 	for _, input := range specialInputs {
 		t.Run("Special input", func(t *testing.T) {
 			// These should not panic or cause database corruption
-			_, err := GetComponentsByBrand(input.category, input.brand)
+			_, err := GetComponentsByBrand(models.GetComponentsByBrandInput{
+				Category: input.category,
+				Brand:    input.brand,
+			})
 			t.Logf("GetComponentsByBrand('%s', '%s') returned error: %v",
 				input.category, input.brand, err)
 		})
@@ -308,7 +341,9 @@ func TestRepositoryPerformance_Integration(t *testing.T) {
 
 	// Test GetAllComponents performance
 	start = time.Now()
-	allResults, err := GetAllComponents()
+	allResults, err := GetAllComponents(models.GetAllComponentsInput{
+		Page: "1",
+	})
 	getAllDuration := time.Since(start)
 
 	require.NoError(t, err)
@@ -317,7 +352,9 @@ func TestRepositoryPerformance_Integration(t *testing.T) {
 
 	// Test category filtering performance
 	start = time.Now()
-	cpuResults, err := GetComponentsByCategory("cpu")
+	cpuResults, err := GetComponentsByCategory(models.GetComponentsByCategoryInput{
+		Category: "cpu",
+	})
 	categoryDuration := time.Since(start)
 
 	require.NoError(t, err)
@@ -325,7 +362,10 @@ func TestRepositoryPerformance_Integration(t *testing.T) {
 
 	// Test brand filtering performance
 	start = time.Now()
-	brandResults, err := GetComponentsByBrand("cpu", "Test Intel")
+	brandResults, err := GetComponentsByBrand(models.GetComponentsByBrandInput{
+		Category: "cpu",
+		Brand:    "Test Intel",
+	})
 	brandDuration := time.Since(start)
 
 	require.NoError(t, err)

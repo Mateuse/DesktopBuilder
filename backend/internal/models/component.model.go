@@ -87,14 +87,15 @@ func (c *Category) Scan(value interface{}) error {
 
 // Component represents the components table
 type Component struct {
-	ID        int64           `json:"id" db:"id"`
-	Category  Category        `json:"category" db:"category"`
-	Brand     string          `json:"brand" db:"brand"`
-	Model     string          `json:"model" db:"model"`
-	SKU       *string         `json:"sku,omitempty" db:"sku"`
-	UPC       *string         `json:"upc,omitempty" db:"upc"`
-	Specs     json.RawMessage `json:"specs" db:"specs"`
-	CreatedAt time.Time       `json:"created_at" db:"created_at"`
+	ID          int64           `json:"id" db:"id"`
+	Category    Category        `json:"category" db:"category"`
+	Brand       string          `json:"brand" db:"brand"`
+	Model       string          `json:"model" db:"model"`
+	SKU         *string         `json:"sku,omitempty" db:"sku"`
+	UPC         *string         `json:"upc,omitempty" db:"upc"`
+	Specs       json.RawMessage `json:"specs" db:"specs"`
+	ReleaseDate *time.Time      `json:"release_date,omitempty" db:"release_date"`
+	CreatedAt   time.Time       `json:"created_at" db:"created_at"`
 }
 
 // ComponentCreate represents the data needed to create a new component

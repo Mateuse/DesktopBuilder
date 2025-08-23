@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/mateuse/desktop-builder-backend/internal/constants"
 	"github.com/mateuse/desktop-builder-backend/internal/models"
@@ -22,24 +21,38 @@ func GetComponentsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := parseComponentQueryParams(r)
+	page := utils.GetPageNumberFromQueryString(r.URL.Query())
 
 	switch {
 	case params.ID != "":
-		handleGetComponentByID(w, params.ID)
+		input := models.GetComponentByIdInput{
+			ID:   params.ID,
+			Page: page,
+		}
+		handleGetComponentByID(w, input)
 	case params.Category != "" && params.Brand != "":
-		handleGetComponentsByBrand(w, params.Category, params.Brand)
+		input := models.GetComponentsByBrandInput{
+			Category: params.Category,
+			Brand:    params.Brand,
+			Page:     page,
+		}
+		handleGetComponentsByBrand(w, input)
 	case params.Category != "":
-		handleGetComponentsByCategory(w, params.Category)
+		input := models.GetComponentsByCategoryInput{
+			Category: params.Category,
+			Page:     page,
+		}
+		handleGetComponentsByCategory(w, input)
 	default:
-		handleGetAllComponents(w)
+		input := models.GetAllComponentsInput{
+			Page: page,
+		}
+		handleGetAllComponents(w, input)
 	}
 }
 
 func parseComponentQueryParams(r *http.Request) models.ComponentQueryParams {
 	brand := r.PathValue("brand")
-	if brand != "" {
-		brand = strings.ToLower(brand)
-	}
 
 	return models.ComponentQueryParams{
 		Category: r.PathValue("category"),
@@ -48,61 +61,57 @@ func parseComponentQueryParams(r *http.Request) models.ComponentQueryParams {
 	}
 }
 
-func handleGetComponentByID(w http.ResponseWriter, id string) {
-	utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_START, nil, id)
+func handleGetComponentByID(w http.ResponseWriter, input models.GetComponentByIdInput) {
+	utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_START, nil, input.ID)
 
-	component, err := services.GetComponentById(id)
+	component, err := services.GetComponentById(input)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_NOT_FOUND, nil, id)
+			utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_NOT_FOUND, nil, input.ID)
 			utils.WriteError(w, http.StatusNotFound, constants.COMPONENT_NOT_FOUND_MESSAGE, nil)
 			return
 		}
-		utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_ERROR, err, id)
+		utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_ERROR, err, input.ID)
 		utils.WriteError(w, http.StatusInternalServerError, constants.INTERNAL_SERVER_ERROR_MESSAGE, err)
 		return
 	}
 
-	utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_SUCCESS, nil, id)
+	utils.Log(constants.HANDLER_GET_COMPONENT_BY_ID_SUCCESS, nil, input.ID)
 	utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, component)
 }
 
-func handleGetComponentsByBrand(w http.ResponseWriter, category, brand string) {
-	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_BRAND_START, nil, category, brand)
+func handleGetComponentsByBrand(w http.ResponseWriter, input models.GetComponentsByBrandInput) {
+	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_BRAND_START, nil, input.Category, input.Brand)
 
-	input := models.GetComponentsByBrandInput{
-		Category: category,
-		Brand:    brand,
-	}
 	components, err := services.GetComponentsByBrand(input)
 	if err != nil {
-		utils.Log(constants.HANDLER_GET_COMPONENTS_BY_BRAND_ERROR, err, category, brand)
+		utils.Log(constants.HANDLER_GET_COMPONENTS_BY_BRAND_ERROR, err, input.Category, input.Brand)
 		utils.WriteError(w, http.StatusInternalServerError, constants.INTERNAL_SERVER_ERROR_MESSAGE, err)
 		return
 	}
 
-	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_BRAND_SUCCESS, nil, category, brand)
+	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_BRAND_SUCCESS, nil, input.Category, input.Brand)
 	utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, components)
 }
 
-func handleGetComponentsByCategory(w http.ResponseWriter, category string) {
-	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_CATEGORY_START, nil, category)
+func handleGetComponentsByCategory(w http.ResponseWriter, input models.GetComponentsByCategoryInput) {
+	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_CATEGORY_START, nil, input.Category)
 
-	components, err := services.GetComponentsByCategory(category)
+	components, err := services.GetComponentsByCategory(input)
 	if err != nil {
-		utils.Log(constants.HANDLER_GET_COMPONENTS_BY_CATEGORY_ERROR, err, category)
+		utils.Log(constants.HANDLER_GET_COMPONENTS_BY_CATEGORY_ERROR, err, input.Category)
 		utils.WriteError(w, http.StatusInternalServerError, constants.INTERNAL_SERVER_ERROR_MESSAGE, err)
 		return
 	}
 
-	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_CATEGORY_SUCCESS, nil, category)
+	utils.Log(constants.HANDLER_GET_COMPONENTS_BY_CATEGORY_SUCCESS, nil, input.Category)
 	utils.WriteSuccess(w, http.StatusOK, constants.SUCCESS_MESSAGE, components)
 }
 
-func handleGetAllComponents(w http.ResponseWriter) {
+func handleGetAllComponents(w http.ResponseWriter, input models.GetAllComponentsInput) {
 	utils.Log(constants.HANDLER_GET_ALL_COMPONENTS_START, nil)
 
-	components, err := services.GetAllComponents()
+	components, err := services.GetAllComponents(input)
 	if err != nil {
 		utils.Log(constants.HANDLER_GET_ALL_COMPONENTS_ERROR, err)
 		utils.WriteError(w, http.StatusInternalServerError, constants.INTERNAL_SERVER_ERROR_MESSAGE, err)

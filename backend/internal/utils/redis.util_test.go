@@ -61,8 +61,6 @@ func TestInitializeRedis_CustomValues(t *testing.T) {
 		RedisClient = originalClient
 	}()
 
-	// This will fail because we don't have a real Redis server
-	// but we can test that it processes the environment variables
 	err := InitializeRedis()
 	assert.Error(t, err) // Expected to fail on connection to custom-host
 	assert.Contains(t, err.Error(), "failed to connect to Redis")
