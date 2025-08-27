@@ -4,7 +4,7 @@ import { Component } from '@/types/components.type';
  * Mock component data for testing
  */
 export const mockComponent: Component = {
-  id: 1,
+  id: "1",
   category: 'cpu',
   brand: 'Intel',
   model: 'Core i7-12700K',
@@ -21,7 +21,7 @@ export const mockComponent: Component = {
 export const generateMockComponents = (count: number): Component[] => {
   return Array.from({ length: count }, (_, index) => ({
     ...mockComponent,
-    id: index + 1,
+    id: (index + 1).toString(),
     model: `${mockComponent.model}-${index + 1}`,
     sku: `${mockComponent.sku}-${index + 1}`,
   }));
