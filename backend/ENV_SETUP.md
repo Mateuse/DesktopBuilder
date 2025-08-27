@@ -19,13 +19,16 @@ REDIS_DB=0
 
 # Server Configuration
 PORT=8080
+
+# CORS Configuration (optional)
+# CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://localhost:5173
 ```
 
 ## Required Environment Variables
 
 ### Database
 - **DB_USER**: Your PostgreSQL username
-- **DB_PASSWORD**: Your PostgreSQL password  
+- **DB_PASSWORD**: Your PostgreSQL password
 - **DB_NAME**: Your PostgreSQL database name
 
 ### Redis
@@ -46,6 +49,9 @@ PORT=8080
 
 ### Server
 - **PORT**: Server port (default: 8080)
+
+### CORS
+- **CORS_ALLOWED_ORIGINS**: Comma-separated list of allowed origins for CORS (default: http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:5173)
 
 ## Setup Instructions
 

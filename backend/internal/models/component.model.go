@@ -87,7 +87,7 @@ func (c *Category) Scan(value interface{}) error {
 
 // Component represents the components table
 type Component struct {
-	ID          int64           `json:"id" db:"id"`
+	ID          string          `json:"id" db:"id"`
 	Category    Category        `json:"category" db:"category"`
 	Brand       string          `json:"brand" db:"brand"`
 	Model       string          `json:"model" db:"model"`
@@ -100,12 +100,13 @@ type Component struct {
 
 // ComponentCreate represents the data needed to create a new component
 type ComponentCreate struct {
-	Category Category        `json:"category" validate:"required"`
-	Brand    string          `json:"brand" validate:"required"`
-	Model    string          `json:"model" validate:"required"`
-	SKU      *string         `json:"sku,omitempty"`
-	UPC      *string         `json:"upc,omitempty"`
-	Specs    json.RawMessage `json:"specs" validate:"required"`
+	Category    Category        `json:"category" validate:"required"`
+	Brand       string          `json:"brand" validate:"required"`
+	Model       string          `json:"model" validate:"required"`
+	SKU         *string         `json:"sku,omitempty"`
+	UPC         *string         `json:"upc,omitempty"`
+	Specs       json.RawMessage `json:"specs" validate:"required"`
+	ReleaseDate *time.Time      `json:"release_date,omitempty"`
 }
 
 // ComponentUpdate represents the data that can be updated for a component

@@ -54,35 +54,35 @@
 		<div id="topbar">
 			<div id="nav">
 				<select id="files">
-				
+
 				<option value="file0">github.com/mateuse/desktop-builder-backend/cmd/api/main.go (0.0%)</option>
-				
+
 				<option value="file1">github.com/mateuse/desktop-builder-backend/internal/handlers/health.handler.go (100.0%)</option>
-				
+
 				<option value="file2">github.com/mateuse/desktop-builder-backend/internal/routes/health.routes.go (0.0%)</option>
-				
+
 				<option value="file3">github.com/mateuse/desktop-builder-backend/internal/testutils/testutils.go (0.0%)</option>
-				
+
 				<option value="file4">github.com/mateuse/desktop-builder-backend/internal/utils/customResponse.util.go (100.0%)</option>
-				
+
 				<option value="file5">github.com/mateuse/desktop-builder-backend/internal/utils/db.util.go (81.8%)</option>
-				
+
 				<option value="file6">github.com/mateuse/desktop-builder-backend/internal/utils/redis.util.go (87.8%)</option>
-				
+
 				<option value="file7">github.com/mateuse/desktop-builder-backend/internal/utils/testutils.go (0.0%)</option>
-				
+
 				</select>
 			</div>
 			<div id="legend">
 				<span>not tracked</span>
-			
+
 				<span class="cov0">not covered</span>
 				<span class="cov8">covered</span>
-			
+
 			</div>
 		</div>
 		<div id="content">
-		
+
 		<pre class="file" id="file0" style="display: none">package main
 
 import (
@@ -97,7 +97,7 @@ import (
 
 func withCORS(next http.Handler) http.Handler <span class="cov0" title="0">{
         return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
-                w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+                w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173,http://localhost:3000,http://localhost:3001")
                 w.Header().Set("Vary", "Origin")
                 w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS")
                 w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
@@ -151,7 +151,7 @@ func main() <span class="cov0" title="0">{
         }</span>
 }
 </pre>
-		
+
 		<pre class="file" id="file1" style="display: none">package handlers
 
 import (
@@ -170,7 +170,7 @@ func HealthHandler(w http.ResponseWriter, r *http.Request) <span class="cov8" ti
         <span class="cov8" title="1">utils.WriteSuccess(w, http.StatusOK, constants.HEALTH_MESSAGE, nil)</span>
 }
 </pre>
-		
+
 		<pre class="file" id="file2" style="display: none">package routes
 
 import (
@@ -183,7 +183,7 @@ func RegisterHealthRoutes(router *http.ServeMux) <span class="cov0" title="0">{
         router.HandleFunc("/health", handlers.HealthHandler)
 }</span>
 </pre>
-		
+
 		<pre class="file" id="file3" style="display: none">package testutils
 
 import (
@@ -277,7 +277,7 @@ func TestRequest(method, url string, body interface{}) *http.Request <span class
 func TestResponseRecorder() *httptest.ResponseRecorder <span class="cov0" title="0">{
         return httptest.NewRecorder()
 }</pre>
-		
+
 		<pre class="file" id="file4" style="display: none">package utils
 
 import (
@@ -311,7 +311,7 @@ func WriteError(w http.ResponseWriter, status int, message string, data interfac
         WriteJSON(w, status, resp)
 }</span>
 </pre>
-		
+
 		<pre class="file" id="file5" style="display: none">package utils
 
 import (
@@ -394,7 +394,7 @@ func GetDB() *sql.DB <span class="cov8" title="1">{
         return DB
 }</span>
 </pre>
-		
+
 		<pre class="file" id="file6" style="display: none">package utils
 
 import (
@@ -511,7 +511,7 @@ func Exists(ctx context.Context, key string) (bool, error) <span class="cov8" ti
         return result &gt; 0, err</span>
 }
 </pre>
-		
+
 		<pre class="file" id="file7" style="display: none">package utils
 
 import (
@@ -606,7 +606,7 @@ func TestResponseRecorder() *httptest.ResponseRecorder <span class="cov0" title=
         return httptest.NewRecorder()
 }</span>
 </pre>
-		
+
 		</div>
 	</body>
 	<script>

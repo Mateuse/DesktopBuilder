@@ -18,7 +18,7 @@ import (
 
 // Mock data for testing
 var mockComponent = models.Component{
-	ID:        1,
+	ID:        "1",
 	Category:  models.CategoryCPU,
 	Brand:     "Intel",
 	Model:     "Core i7-12700K",
@@ -31,7 +31,7 @@ var mockComponent = models.Component{
 var mockComponents = []models.Component{
 	mockComponent,
 	{
-		ID:        2,
+		ID:        "2",
 		Category:  models.CategoryCPU,
 		Brand:     "AMD",
 		Model:     "Ryzen 7 5800X",
